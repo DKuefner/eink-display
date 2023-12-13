@@ -14,3 +14,7 @@ There are some very nice 3D print housings at Thingiverse like [this](https://ww
 For battery I decided for a 750mAh LiPo. Given my current settings it gives a run time of approx. x days.
 ### ESPhome
 My Homeassistant runs as a Docker container. In this case it is not possible to integrate ESPhome permanently into Homeassistant. For this reason I run ESPhome as a Docker Container for compiling and uploading only. ESPhome also provides a Dashboard which allows OTA updates and logging amongst other things. See [ESPhome](https://esphome.io/guides/getting_started_command_line) documentation.
+
+![2.3" Display with housing](IMG_20231213_123816644.jpg)
+![Housing with Stand](IMG_20231213_123826820.jpg)
+![Battery](IMG_20231213_123855640_HDR.jpg)
