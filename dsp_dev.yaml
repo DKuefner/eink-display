@@ -1,0 +1,216 @@
+substitutions:
+  run_time: 120sec
+  sleep_time: 30min
+
+esphome:
+  name: epaper2-dev
+  includes:
+          - common.h
+  platform: ESP32
+  board: ttgo-t1
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: "Europe/Berlin"
+    on_time:
+      - hours: 23
+        then: 
+          - deep_sleep.enter:
+                  id: deep_sleep_1
+                  until: "06:40:00"
+                  time_id: sntp_time
+                  
+sun:
+  latitude: 49.4783°
+  longitude: 10.9707°
+  id: sun_id
+
+  on_sunrise:
+    - then:
+        - logger.log: Good morning!
+    # Custom elevation, will be called shortly after the trigger above.
+    - elevation: 5°
+      then:
+        - logger.log: Good morning 2!
+
+  on_sunset:
+    - elevation: 5°
+      then:
+        - logger.log: Good evening!
+
+deep_sleep:
+  id: deep_sleep_1     
+  run_duration: ${run_time}
+  sleep_duration: ${sleep_time}
+  esp32_ext1_wakeup:
+    pins: GPIO39
+    mode: ALL_LOW
+
+ota:
+  password: ""
+
+wifi:
+  ssid: "secret-WiFi-SSID"
+  password: "secret WiFi password"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "eink Fallback Hotspot"
+    password: "secret password"
+
+captive_portal:
+
+spi:
+ clk_pin: 18
+ mosi_pin: 23
+
+font:
+  - file: ./fonts/OpenSans-Medium.ttf
+    id: font_osm
+    size: 24
+  - file: ./fonts/OpenSans-Bold.ttf
+    id: font_osb
+    size: 24
+  - file: ./fonts/OpenSans-Medium.ttf
+    id: font_osm_lrg
+    size: 38
+  - file: ./fonts/OpenSans-Bold.ttf
+    id: font_osm_bd_lrg
+    size: 38
+  - file: ./fonts/OpenSans-Medium.ttf
+    id: font_osm_small
+    size: 14
+  - file: ./fonts/materialdesignicons-webfont.ttf
+    id: font_icons_small
+    size: 24
+    glyphs:
+      # sun
+      - "\U000F076D" #dawn 
+      - "\U000F076C" #dusk 
+      # energy
+      - "\U000F140B" #arrowfull
+      - "\U000F140C" #arrowempty
+      - "\U000F1425" #plugon  
+      - "\U000F1424" #plugoff
+      # date
+      - "\U000F16E1" #calendar   
+      # battery
+      - "\U000F008E" # bat empty
+      - "\U000F007A" # bat 10
+      - "\U000F007B" # bat 20
+      - "\U000F007C" # bat 30
+      - "\U000F007D" # bat 40
+      - "\U000F007E" # bat 50
+      - "\U000F007F" # bat 60
+      - "\U000F0080" # bat 70
+      - "\U000F0081" # bat 80
+      - "\U000F0082" # bat 90
+      - "\U000F0079" # bat 100
+
+text_sensor:
+  - platform: homeassistant
+    entity_id: sensor.sun_next_dawn
+    id: dawn
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.sun_next_dusk
+    id: dusk
+    internal: true
+  
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.balkon_wr_yieldtotal
+    id: yieldtotal
+    internal: true
+  
+  - platform: homeassistant
+    entity_id: sensor.balkon_wr_power
+    id: power
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.balkon_wr_yieldday
+    id: yieldday
+    internal: true
+
+  - platform: adc
+    pin: GPIO35
+    name: "Battery Voltage"
+    id: batt_volt
+    attenuation: auto
+    unit_of_measurement: 'V'
+    filters:
+      - multiply: 2
+    update_interval: 60s
+
+  - platform: template
+    name: "Battery"
+    id: batt
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    device_class: battery
+    lambda: |-
+      return (id(batt_volt).state - 3.5) / 0.7 * 100.00;      
+    update_interval: 60s
+    entity_category: diagnostic
+    on_value: # Actions to perform once data for the last sensor has been received
+      then:
+        - script.execute: all_data_received
+
+script:
+  - id: all_data_received
+    then:
+      - component.update: batt_volt
+      - component.update: batt
+      - component.update: ttgo_display
+
+display:
+  - platform: waveshare_epaper
+    id: ttgo_display
+    cs_pin: 5
+    dc_pin: 17
+    busy_pin: 4
+    reset_pin: 16
+    model: 2.13in-ttgo-dke
+    update_interval: 60s
+    rotation: 90
+    lambda: |-
+      // icon constants
+      #define ICON_dawn         "\U000F076D"
+      #define ICON_dusk         "\U000F076C"
+      #define ICON_arrowfull    "\U000F140B"
+      #define ICON_arrowempty   "\U000F140C"
+      #define ICON_plugon       "\U000F1425"
+      #define ICON_plugoff      "\U000F1424"
+      #define ICON_calendar     "\U000F16E1"
+      it.print(25, 23, id(font_osm), "Ertrag:  ");
+      it.print(1, 30, id(font_icons_small), ICON_arrowfull);
+      it.printf(115, 23, id(font_osb), "%.1f", id(yieldtotal).state);
+      it.printf(185, 23, id(font_osm), "kWh");
+      it.print(25, 47, id(font_osm), "Power:  ");
+      it.print(1, 55, id(font_icons_small), ICON_arrowempty);
+      it.printf(115, 47, id(font_osb), "%.1f", id(power).state);
+      it.printf(185, 47, id(font_osm), "W");
+      it.print(25, 71, id(font_osm), "Heute:  ");
+      it.print(1, 78, id(font_icons_small), ICON_calendar);
+      it.printf(115, 71, id(font_osb), "%.1f", id(yieldday).state);
+      it.printf(185, 71, id(font_osm), "Wh");
+      it.strftime(122, 1, id(font_osm_small), TextAlign::TOP_CENTER, "%A %B %d %Y", id(sntp_time).now());
+      //it.printf(1, 104, id(font_icons_small), ICON_dawn);
+      //it.printf(30, 104, id(font_osm_small), "%s", id(dawn).state.c_str());
+      // Battery
+      auto batIcon = batteryToIcon(id(batt).state);
+      it.printf(230, 118, id(font_icons_small), TextAlign::BASELINE_LEFT, batIcon.c_str());
+      it.printf(180, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%.2f", id(batt_volt).state);
+      it.printf(190, 104, id(font_osm_small), TextAlign::TOP_LEFT, "V");
+      it.printf(1, 104, id(font_osm_small), TextAlign::TOP_LEFT, "Letzter Update: ");
+      it.strftime(130, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%H:%M", id(sntp_time).now());
