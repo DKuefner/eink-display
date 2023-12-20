@@ -3,7 +3,7 @@ substitutions:
   sleep_time: 30min
 
 esphome:
-  name: epaper2-dev
+  name: epaper2
   includes:
           - common.h
   platform: ESP32
