@@ -3,7 +3,7 @@ substitutions:
   sleep_time: 30min
 
 esphome:
-  name: epaper2-dev
+  name: epaper2
   includes:
           - common.h
   platform: ESP32
@@ -58,13 +58,13 @@ ota:
   password: ""
 
 wifi:
-  ssid: "secret WiFi SSID"
-  password: "secret WiFi password"
+  ssid: !secret WLAN_SSID
+  password: !secret WLAN_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "eink Fallback Hotspot"
-    password: "secret password"
+    password: !secret fallback_password
 
 captive_portal:
 

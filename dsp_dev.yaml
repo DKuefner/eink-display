@@ -21,7 +21,7 @@ time:
     id: sntp_time
     timezone: "Europe/Berlin"
     on_time:
-      - hours: 23
+      - hours: 20
         then: 
           - deep_sleep.enter:
                   id: deep_sleep_1
@@ -58,13 +58,13 @@ ota:
   password: ""
 
 wifi:
-  ssid: "secret-WiFi-SSID"
-  password: "secret WiFi password"
+  ssid: !secret WLAN_SSID
+  password: !secret WLAN_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "eink Fallback Hotspot"
-    password: "secret password"
+    password: !secret fallback_password
 
 captive_portal:
 
@@ -195,15 +195,15 @@ display:
       it.print(25, 23, id(font_osm), "Ertrag:  ");
       it.print(1, 30, id(font_icons_small), ICON_arrowfull);
       it.printf(115, 23, id(font_osb), "%.1f", id(yieldtotal).state);
-      it.printf(185, 23, id(font_osm), "kWh");
+      it.printf(190, 23, id(font_osm), "kWh");
       it.print(25, 47, id(font_osm), "Power:  ");
       it.print(1, 55, id(font_icons_small), ICON_arrowempty);
       it.printf(115, 47, id(font_osb), "%.1f", id(power).state);
-      it.printf(185, 47, id(font_osm), "W");
+      it.printf(190, 47, id(font_osm), "W");
       it.print(25, 71, id(font_osm), "Heute:  ");
       it.print(1, 78, id(font_icons_small), ICON_calendar);
       it.printf(115, 71, id(font_osb), "%.1f", id(yieldday).state);
-      it.printf(185, 71, id(font_osm), "Wh");
+      it.printf(190, 71, id(font_osm), "Wh");
       it.strftime(122, 1, id(font_osm_small), TextAlign::TOP_CENTER, "%A %B %d %Y", id(sntp_time).now());
       //it.printf(1, 104, id(font_icons_small), ICON_dawn);
       //it.printf(30, 104, id(font_osm_small), "%s", id(dawn).state.c_str());
@@ -211,6 +211,6 @@ display:
       auto batIcon = batteryToIcon(id(batt).state);
       it.printf(230, 118, id(font_icons_small), TextAlign::BASELINE_LEFT, batIcon.c_str());
       it.printf(180, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%.2f", id(batt_volt).state);
-      it.printf(190, 104, id(font_osm_small), TextAlign::TOP_LEFT, "V");
+      it.printf(195, 104, id(font_osm_small), TextAlign::TOP_LEFT, "V");
       it.printf(1, 104, id(font_osm_small), TextAlign::TOP_LEFT, "Letzter Update: ");
       it.strftime(130, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%H:%M", id(sntp_time).now());
