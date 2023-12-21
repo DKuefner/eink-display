@@ -58,13 +58,13 @@ ota:
   password: ""
 
 wifi:
-  ssid: "secret-WiFi-SSID"
-  password: "secret WiFi password"
+  ssid: !secret WLAN_SSID
+  password: !secret WLAN_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "eink Fallback Hotspot"
-    password: "secret password"
+    password: !secret fallback_password
 
 captive_portal:
 
@@ -211,6 +211,6 @@ display:
       auto batIcon = batteryToIcon(id(batt).state);
       it.printf(230, 118, id(font_icons_small), TextAlign::BASELINE_LEFT, batIcon.c_str());
       it.printf(180, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%.2f", id(batt_volt).state);
-      it.printf(190, 104, id(font_osm_small), TextAlign::TOP_LEFT, "V");
+      it.printf(195, 104, id(font_osm_small), TextAlign::TOP_LEFT, "V");
       it.printf(1, 104, id(font_osm_small), TextAlign::TOP_LEFT, "Letzter Update: ");
       it.strftime(130, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%H:%M", id(sntp_time).now());
