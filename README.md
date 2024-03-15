@@ -8,10 +8,10 @@ After this has been done I was looking for a way to display the data on a kind o
 To save power and prolongen the battery life the ESP32 deep sleep mode is being used. Due to the small size I decided to display only 3 values, which are yieldtotal, yieldday and power as being delivered by openDTU. Addionaly the date, last update and battery state. The values are being updated every 30 minutes. From 23:00 on the ESP32 sleeps until 6:40 in the morning.
 
 This is the point where I'm looking for a smarter solution, i.e. the ESP32 gets out of sleep mode at sunrise and fall into sleep again at sunset, by keeping the 30 min update interval during the day. Expermenting with the `on_sunset` and `on_sunrise` methods didn't work. It seems that the ESP32 is missing sunset and sunrise events when it's in deep sleep mode at this events.
-Currently I'm using fixed row and column values. I'll try to implment X and Y coordinates which seems to b emore flexible.
+Currently I'm using fixed row and column values. I'll try to implment X and Y coordinates which seems to be more flexible.
 ### Battery and Housing
 There are some very nice 3D print housings at Thingiverse like [this](https://www.thingiverse.com/thing:5966664).
-For battery I decided for a 750mAh LiPo. Given my current settings it gives a run time of approx. x days.
+For battery I decided for a 750mAh LiPo. Given my current settings it gives a run time of approx. 14 days.
 ### ESPhome
 My Homeassistant runs as a Docker container. In this case it is not possible to integrate ESPhome permanently into Homeassistant. For this reason I run ESPhome as a Docker Container for compiling and uploading only. ESPhome also provides a Dashboard which allows OTA updates and logging amongst other things. See [ESPhome](https://esphome.io/guides/getting_started_command_line) documentation.
 
