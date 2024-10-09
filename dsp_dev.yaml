@@ -114,6 +114,8 @@ font:
       - "\U000F0081" # bat 80
       - "\U000F0082" # bat 90
       - "\U000F0079" # bat 100
+      # wlan
+      - "\U000F16BD" # wlan 
 
 text_sensor:
   - platform: homeassistant
@@ -192,18 +194,20 @@ display:
       #define ICON_plugon       "\U000F1425"
       #define ICON_plugoff      "\U000F1424"
       #define ICON_calendar     "\U000F16E1"
+      #define ICON_wlan         "\U000F16BD"
       it.print(25, 23, id(font_osm), "Ertrag:  ");
       it.print(1, 30, id(font_icons_small), ICON_arrowfull);
       it.printf(115, 23, id(font_osb), "%.1f", id(yieldtotal).state);
-      it.printf(190, 23, id(font_osm), "kWh");
+      it.printf(195, 23, id(font_osm), "kWh");
       it.print(25, 47, id(font_osm), "Power:  ");
       it.print(1, 55, id(font_icons_small), ICON_arrowempty);
       it.printf(115, 47, id(font_osb), "%.1f", id(power).state);
-      it.printf(190, 47, id(font_osm), "W");
+      it.printf(195, 47, id(font_osm), "W");
       it.print(25, 71, id(font_osm), "Heute:  ");
       it.print(1, 78, id(font_icons_small), ICON_calendar);
-      it.printf(115, 71, id(font_osb), "%.1f", id(yieldday).state);
-      it.printf(190, 71, id(font_osm), "Wh");
+      it.printf(115, 71, id(font_osb), "%.0f", id(yieldday).state);
+      it.printf(195, 71, id(font_osm), "Wh");
+      it.print(230, 3, id(font_icons_small), ICON_wlan);
       it.strftime(122, 1, id(font_osm_small), TextAlign::TOP_CENTER, "%A %B %d %Y", id(sntp_time).now());
       //it.printf(1, 104, id(font_icons_small), ICON_dawn);
       //it.printf(30, 104, id(font_osm_small), "%s", id(dawn).state.c_str());
