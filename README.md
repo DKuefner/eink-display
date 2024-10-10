@@ -11,7 +11,7 @@ This is the point where I'm looking for a smarter solution, i.e. the ESP32 gets 
 Currently I'm using fixed row and column values. I'll try to implment X and Y coordinates which seems to be more flexible.
 ### Battery and Housing
 There are some very nice 3D print housings at Thingiverse like [this](https://www.thingiverse.com/thing:5966664).
-For battery I decided for a 750mAh LiPo. Given my current settings it gives a run time of approx. 14 days.
+For battery I decided for a 750mAh LiPo. Given my current settings it gives a run time of approx. 10 to 12 days.
 ### ESPhome
 My Homeassistant runs as a Docker container. In this case it is not possible to integrate ESPhome permanently into Homeassistant. For this reason I run ESPhome as a Docker Container for compiling and uploading only. ESPhome also provides a Dashboard which allows OTA updates and logging amongst other things. See [ESPhome](https://esphome.io/guides/getting_started_command_line) documentation.
 
