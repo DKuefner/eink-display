@@ -1,9 +1,9 @@
 substitutions:
   run_time: 120sec
-  sleep_time: 30min
+  sleep_time: 30min 
 
 esphome:
-  name: epaper2-dev
+  name: epaper2
   includes:
           - common.h
   platform: ESP32
@@ -115,7 +115,11 @@ font:
       - "\U000F0082" # bat 90
       - "\U000F0079" # bat 100
       # wlan
-      - "\U000F16BD" # wlan 
+      - "\U000F091F" # wlan 00
+      - "\U000F092B" # wlan 20
+      - "\U000F0922"  # wlan 40
+      - "\U000F0925"  # wlan 80
+      - "\U000F0928"  # wlan 100  
 
 text_sensor:
   - platform: homeassistant
@@ -168,12 +172,30 @@ sensor:
       then:
         - script.execute: all_data_received
 
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    id: wifi_signal_percent  
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+
 script:
   - id: all_data_received
     then:
       - component.update: batt_volt
       - component.update: batt
       - component.update: ttgo_display
+      - component.update: wifi_signal_db
 
 display:
   - platform: waveshare_epaper
@@ -194,7 +216,13 @@ display:
       #define ICON_plugon       "\U000F1425"
       #define ICON_plugoff      "\U000F1424"
       #define ICON_calendar     "\U000F16E1"
-      #define ICON_wlan         "\U000F16BD"
+      #define ICON_wlan_ex      "\U000F0928"
+      #define ICON_wlan_good    "\U000F0925"
+      #define ICON_wlan_fair    "\U000F0922"
+      #define ICON_wlan_weak    "\U000F091F"
+      #define ICON_wlan_unlike  "\U000F092B"
+
+      // Solar Energy  
       it.print(25, 23, id(font_osm), "Ertrag:  ");
       it.print(1, 30, id(font_icons_small), ICON_arrowfull);
       it.printf(115, 23, id(font_osb), "%.1f", id(yieldtotal).state);
@@ -207,11 +235,33 @@ display:
       it.print(1, 78, id(font_icons_small), ICON_calendar);
       it.printf(115, 71, id(font_osb), "%.0f", id(yieldday).state);
       it.printf(195, 71, id(font_osm), "Wh");
-      it.print(230, 3, id(font_icons_small), ICON_wlan);
+      
+      //WiFi Signal Strength
+      if(id(wifi_signal_db).has_state()) {
+        if (id(wifi_signal_db).state >= -50) {
+          it.printf(228, 3, id(font_icons_small), ICON_wlan_ex);
+           ESP_LOGI("WiFi", "Exellent");
+        } else if (id(wifi_signal_db).state  >= -60) {
+           it.printf(228, 3, id(font_icons_small), ICON_wlan_good);
+           ESP_LOGI("WiFi", "Good");
+        } else if (id(wifi_signal_db).state  >= -67) {
+           it.printf(228, 3, id(font_icons_small), ICON_wlan_fair);
+           ESP_LOGI("WiFi", "Fair");
+        } else if (id(wifi_signal_db).state  >= -70) {
+           it.printf(228, 3, id(font_icons_small), ICON_wlan_weak);
+           ESP_LOGI("WiFi", "Weak");
+        } else {
+           it.printf(228, 3, id(font_icons_small), ICON_wlan_unlike);
+           ESP_LOGI("WiFi", "Unlikely");
+        }
+      }  
+      
+      //Time
       it.strftime(122, 1, id(font_osm_small), TextAlign::TOP_CENTER, "%A %B %d %Y", id(sntp_time).now());
       //it.printf(1, 104, id(font_icons_small), ICON_dawn);
       //it.printf(30, 104, id(font_osm_small), "%s", id(dawn).state.c_str());
-      // Battery
+      
+      // Battery and Footer
       auto batIcon = batteryToIcon(id(batt).state);
       it.printf(230, 118, id(font_icons_small), TextAlign::BASELINE_LEFT, batIcon.c_str());
       it.printf(180, 104, id(font_osm_small), TextAlign::TOP_CENTER, "%.2f", id(batt_volt).state);
